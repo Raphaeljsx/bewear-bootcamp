@@ -19,9 +19,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@radix-ui/react-label";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchema = z
@@ -58,10 +60,24 @@ const SignUpForm = () => {
     },
   });
 
-  function onSubmit(values: FormValues) {
-    console.log("Formulário validado com sucesso");
-
-    console.log(values);
+  async function onSubmit(values: FormValues) {
+    try {
+      const { data, error } = await authClient.signUp.email({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+        fetchOptions: {
+          onSuccess: () => {
+            toast.success("Conta criada com sucesso");
+          },
+          onError: (error) => {
+            toast.error(error.error.message);
+          },
+        },
+      });
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (
